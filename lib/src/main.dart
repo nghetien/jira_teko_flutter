@@ -30,14 +30,20 @@ class JiraTekoFlutter {
 
   static void setProjectInfo(JiraTekoProjectInfo info) => _projectInfo = info;
 
+  static const String pathFileExportResultTest = 'test/export_result_test.log';
+
+  static String _pathFileExportAllTest = 'test/export_result_all_test.json';
+
+  static String get pathFileExportAllTest => _pathFileExportAllTest;
+
+  static void setPathFileExportAllTest(String path) => _pathFileExportAllTest = path;
+
   JiraTekoFlutter({
     required this.issues,
   });
 
   final List<String> issues;
 
-  static const String pathFileExportResultTest = 'test/export_result_test.log';
-  static const String pathFileExportAllTest = 'test/export_result_all_test.json';
   static late final String token;
 
   static late final int parentIdOfFolderTestCase;
