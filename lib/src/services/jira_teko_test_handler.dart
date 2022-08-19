@@ -1,5 +1,6 @@
-import '../main.dart';
-import 'jira_teko_test_runner.dart';
+import 'package:jira_teko_flutter/src/main.dart';
+import 'package:jira_teko_flutter/src/services/services.dart';
+import 'package:jira_teko_flutter/src/utils/utils.dart';
 
 class JiraTekoTestHandler {
   JiraTekoTestHandler({
@@ -58,9 +59,8 @@ class JiraTekoTestHandler {
       throw Exception('List test case in cycles is empty');
     }
     try {
-      return allTestCaseInCycles.firstWhere(
-              (testCase) => testCase['lastTestResult']['testCaseId'] == testCaseId)['lastTestResult']
-          ['id'] as int;
+      return allTestCaseInCycles.firstWhere((testCase) =>
+          testCase['lastTestResult']['testCaseId'] == testCaseId)['lastTestResult']['id'] as int;
     } catch (e) {
       throw Exception('Cant not find id test case in cycles');
     }
@@ -82,7 +82,7 @@ class JiraTekoTestHandler {
       nameTestCycle =
           nameTestCycle.substring(match!.group(0)?.length ?? 0, nameTestCycle.length).trim();
     } catch (e) {
-      print(e);
+      log(e);
     }
 
     /// count round
@@ -122,32 +122,36 @@ class JiraTekoTestHandler {
       testCycle['id'],
     );
 
-    final List<dynamic> testCases = mapIssuesToTestCases[issueKey]!.map((element) => {
-      "id": getIdTestCaseInCycles(allTestCaseInCycles, element['id']),
-      "testResultStatusId": JiraTekoFlutter.mapStatusToIdStatus[element['status'] ?? 'Fail']!,
-    }).toList();
+    final List<dynamic> testCases = mapIssuesToTestCases[issueKey]!
+        .map(
+          (element) => {
+            "id": getIdTestCaseInCycles(allTestCaseInCycles, element['id']),
+            "testResultStatusId": JiraTekoFlutter.mapStatusToIdStatus[element['status'] ?? 'Fail']!,
+          },
+        )
+        .toList();
     JiraTekoTestRunner.updateTestStatusInCycles(testCases);
   }
 
   /// Submit after test
   Future submitAfterTest(String issueKey) async {
     try {
-      print('Create $issueKey folder and test cycles!');
+      log('Create $issueKey folder and test cycles!');
 
       /// Create folder for test cases & test cycle on Jira
       await JiraTekoTestRunner.createTestFolder(issueKey);
 
-      print('Create test case of folder $issueKey!');
+      log('Create test case of folder $issueKey!');
 
       /// Handle test cases available in jira && Create test cases unavailable in jira
       await handleMapTestIssuesToTestCases(issueKey);
 
-      print('Create test cycles of folder $issueKey!');
+      log('Create test cycles of folder $issueKey!');
 
       /// create test cycle on Jira
       await createTestCycle(issueKey);
     } catch (error) {
-      print(error);
+      log(error);
       throw Exception('Failed to submit after test');
     }
   }

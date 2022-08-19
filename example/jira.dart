@@ -9,10 +9,14 @@ void main() async {
     const JiraTekoProjectInfo(
       scheme: 'https',
       host: 'jira.teko.vn',
-      jiraUserName: '', // your jira username here
-      jiraPassword: '', // your jira password here
-      projectKey: '', // your project key
-      projectId: -1, // your project id
+      jiraUserName: '',
+      // your jira username here
+      jiraPassword: '',
+      // your jira password here
+      projectKey: '',
+      // your project key
+      projectId: -1,
+      // your project id
       folder: '', // your path of folder you want to push test case
     ),
   );

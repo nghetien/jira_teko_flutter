@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'services/services.dart';
+import 'utils/utils.dart';
 
 class JiraTekoProjectInfo {
   final String scheme;
@@ -30,20 +31,16 @@ class JiraTekoFlutter {
 
   static void setProjectInfo(JiraTekoProjectInfo info) => _projectInfo = info;
 
-  static const String pathFileExportResultTest = 'test/export_result_test.log';
-
-  static String _pathFileExportAllTest = 'test/export_result_all_test.json';
-
-  static String get pathFileExportAllTest => _pathFileExportAllTest;
-
-  static void setPathFileExportAllTest(String path) => _pathFileExportAllTest = path;
-
   JiraTekoFlutter({
     required this.issues,
-  });
+  }) {
+    _processHelper = _getProcessHelper();
+  }
 
   final List<String> issues;
 
+  static const String pathFileExportResultTest = 'test/export_result_test.log';
+  static const String pathFileExportAllTest = 'test/export_result_all_test.json';
   static late final String token;
 
   static late final int parentIdOfFolderTestCase;
@@ -54,9 +51,12 @@ class JiraTekoFlutter {
   static final Map<String, int> mapKeyToIdFolderCycles = {};
   static final Map<String, int> mapStatusToIdStatus = {};
 
-  String getCommand(String issue) {
-    /// TODO add platform MACOS and Linux
-    return 'findstr /s /m /p $issue *_test.dart*';
+  late final ProcessHelper _processHelper;
+
+  ProcessHelper _getProcessHelper() {
+    if (Platform.isLinux || Platform.isMacOS) return MacOSProcessHelper();
+
+    return WindowsProcessHelper();
   }
 
   Map<String, dynamic> findFolder(List<dynamic> children, String nameOfFolderFind) {
@@ -68,10 +68,7 @@ class JiraTekoFlutter {
     return {};
   }
 
-  Map<String, dynamic> findFolderByName(
-    List<dynamic> children,
-    String folderName,
-  ) {
+  Map<String, dynamic> findFolderByName(List<dynamic> children, String folderName) {
     final List<String> namesFolder = JiraTekoFlutter.projectInfo.folder
         .split('/')
         .where((element) => element.isNotEmpty)
@@ -202,31 +199,26 @@ class JiraTekoFlutter {
     parentIdOfFolderCycles = await getParentIdCyclesFolder();
     await handleStatusTestCase();
 
-    print('=====================================================================================');
-    print('*** Run all tests!');
-    print('=====================================================================================');
+    log('=====================================================================================');
+    log('*** Run all tests!');
+    log('=====================================================================================');
 
     final Map<String, dynamic> mapIssuesToTestCases = {};
     for (String issue in issues) {
-      final ProcessResult findFile = await Process.run(
-        getCommand(issue),
-        [],
-        runInShell: true,
-      );
-      final String pathFile = findFile.stdout;
+      final String pathFile = await _processHelper.findFileBy(issue: issue);
       if (pathFile.isEmpty) {
         throw FileSystemException('File not found path issue $issue');
       } else {
         final List<String> paths = pathFile.trim().split('\r\n');
         for (String path in paths) {
-          print('path: $path');
-          print('run: ${'flutter test $path --reporter json > $pathFileExportResultTest'}');
+          log('path: $path');
+          log('run: ${'flutter test $path --reporter json > $pathFileExportResultTest'}');
 
-          await Process.run(
-            'flutter test $path --reporter json > $pathFileExportResultTest',
-            [],
-            runInShell: true,
+          await _processHelper.runTestWith(
+            path: path,
+            pathFileExportResultTest: pathFileExportResultTest,
           );
+
           final List<Map<String, dynamic>> resultsTestCase = await getResultsTestCase(issue);
           if (mapIssuesToTestCases[issue] == null) {
             mapIssuesToTestCases[issue] = [];
@@ -239,14 +231,14 @@ class JiraTekoFlutter {
       }
     }
 
-    print('=====================================================================================');
-    print('*** Run all tests done!');
-    print('=====================================================================================');
+    log('=====================================================================================');
+    log('*** Run all tests done!');
+    log('=====================================================================================');
 
     File(pathFileExportResultTest).delete();
 
-    print('*** Handle results!');
-    print('=====================================================================================');
+    log('*** Handle results!');
+    log('=====================================================================================');
 
     /// Submit all test cast to jira
     final JiraTekoTestHandler jiraTekoTestHandler = JiraTekoTestHandler(
@@ -255,14 +247,14 @@ class JiraTekoFlutter {
     final Map<String, List<Map<String, dynamic>>> resultHandle =
         await jiraTekoTestHandler.submitTestJira();
 
-    print('=====================================================================================');
-    print('*** Write result to file json!');
-    print('=====================================================================================');
+    log('=====================================================================================');
+    log('*** Write result to file json!');
+    log('=====================================================================================');
 
     final File allTestCase = await File(pathFileExportAllTest).create();
     allTestCase.writeAsString(json.encode(resultHandle));
 
-    print('*** Push test case to jira finished!');
-    print('=====================================================================================');
+    log('*** Push test case to jira finished!');
+    log('=====================================================================================');
   }
 }
