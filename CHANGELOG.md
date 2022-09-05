@@ -4,3 +4,5 @@
 * Add support for macOS, Linux
 * clear warning in Dart Analysis
 * Logging beautifier
+## 0.0.3
+* Add read file env for dart
