@@ -1,10 +1,10 @@
 name: jira_teko_flutter
 description: Auto push testcases and result to jira.
-version: 0.0.3
+version: 0.0.4
 homepage: https://github.com/nghetien/jira_teko_flutter
 
 environment:
-  sdk: ">=2.17.3 <3.0.0"
+  sdk: ">=2.18.0 <3.0.0"
   flutter: ">=1.17.0"
 
 dependencies:

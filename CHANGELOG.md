@@ -6,3 +6,5 @@
 * Logging beautifier
 ## 0.0.3
 * Add read file env for dart
+## 0.0.4
+* Regex apply for file name matching
