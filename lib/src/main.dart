@@ -39,8 +39,8 @@ class JiraTekoFlutter {
 
   final List<String> issues;
 
-  static const String pathFileExportResultTest = 'test/export_result_test.log';
-  static const String pathFileExportAllTest = 'test/export_result_all_test.json';
+  static const String pathFileExportResultTest = './test/export_result_test.log';
+  static const String pathFileExportAllTest = './test/export_result_all_test.json';
   static late final String token;
 
   static late final int parentIdOfFolderTestCase;
@@ -209,7 +209,11 @@ class JiraTekoFlutter {
       if (pathFile.isEmpty) {
         throw FileSystemException('File not found path issue $issue');
       } else {
-        final List<String> paths = pathFile.trim().split('\r\n');
+        final RegExp pathRegex = RegExp(r'.\/(.*)\.dart');
+
+        final Iterable<String> paths =
+            pathRegex.allMatches(pathFile.trim()).map((e) => "./${e.group(1)}.dart");
+
         for (String path in paths) {
           log('path: $path');
           log('run: ${'flutter test $path --reporter json > $pathFileExportResultTest'}');
