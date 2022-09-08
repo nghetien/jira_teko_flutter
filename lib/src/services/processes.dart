@@ -5,6 +5,8 @@ abstract class ProcessHelper {
 
   Future<ProcessResult> runTestWith(
       {required String path, required String pathFileExportResultTest});
+
+  Iterable<String> getPaths(String pathFile);
 }
 
 class WindowsProcessHelper implements ProcessHelper {
@@ -29,6 +31,11 @@ class WindowsProcessHelper implements ProcessHelper {
         [],
         runInShell: true,
       );
+
+  @override
+  Iterable<String> getPaths(String pathFile) {
+    return pathFile.trim().split('\r\n');
+  }
 }
 
 class MacOSProcessHelper implements ProcessHelper {
@@ -57,4 +64,11 @@ class MacOSProcessHelper implements ProcessHelper {
           'flutter test $path --reporter json > $pathFileExportResultTest',
         ],
       );
+
+  @override
+  Iterable<String> getPaths(String pathFile) {
+    final RegExp pathRegex = RegExp(r'.\/(.*)\.dart');
+
+    return pathRegex.allMatches(pathFile.trim()).map((e) => "./${e.group(1)}.dart");
+  }
 }

@@ -220,10 +220,7 @@ class JiraTekoFlutter {
       if (pathFile.isEmpty) {
         throw FileSystemException('File not found path issue $issue');
       } else {
-        final RegExp pathRegex = RegExp(r'.\/(.*)\.dart');
-
-        final Iterable<String> paths =
-            pathRegex.allMatches(pathFile.trim()).map((e) => "./${e.group(1)}.dart");
+        final Iterable<String> paths = _processHelper.getPaths(pathFile);
 
         for (String path in paths) {
           log('path: $path');
