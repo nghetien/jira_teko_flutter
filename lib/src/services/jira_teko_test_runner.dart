@@ -17,10 +17,24 @@ class JiraTekoTestRunner {
     return uri;
   }
 
-  static Future<List<dynamic>> getStatusTest() async {
+  static Future<List<dynamic>> getStatusTestResult() async {
     final response = await http.get(
       getUrlWith(
         suffix: '/tests/1.0/project/${JiraTekoFlutter.projectInfo.projectId}/testresultstatus',
+      ),
+      headers: headers,
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    } else {
+      throw Exception('Failed to get status test case result');
+    }
+  }
+
+  static Future<List<dynamic>> getStatusTestCase() async {
+    final response = await http.get(
+      getUrlWith(
+        suffix: '/tests/1.0/project/${JiraTekoFlutter.projectInfo.projectId}/testcasestatus',
       ),
       headers: headers,
     );
@@ -201,6 +215,7 @@ class JiraTekoTestRunner {
         "folderId": folderId,
         "name": nameCycle,
         "projectId": JiraTekoFlutter.projectInfo.projectId,
+        'statusId': JiraTekoFlutter.mapStatusToIdStatusTestCase['Approved'] // status is approved
       }),
       headers: headers,
     );

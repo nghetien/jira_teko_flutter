@@ -8,3 +8,5 @@
 * Add read file env for dart
 ## 0.0.4
 * Regex apply for file name matching
+## 0.0.4
+* Add status for new testcase

@@ -126,7 +126,7 @@ class JiraTekoTestHandler {
         .map(
           (element) => {
             "id": getIdTestCaseInCycles(allTestCaseInCycles, element['id']),
-            "testResultStatusId": JiraTekoFlutter.mapStatusToIdStatus[element['status'] ?? 'Fail']!,
+            "testResultStatusId": JiraTekoFlutter.mapStatusToIdStatusTestCaseResult[element['status'] ?? 'Fail']!,
           },
         )
         .toList();

@@ -49,7 +49,8 @@ class JiraTekoFlutter {
   static late final List<Map<String, dynamic>> listParentFolderCycles;
   static final Map<String, int> mapKeyToIdFolderTestCase = {};
   static final Map<String, int> mapKeyToIdFolderCycles = {};
-  static final Map<String, int> mapStatusToIdStatus = {};
+  static final Map<String, int> mapStatusToIdStatusTestCaseResult = {};
+  static final Map<String, int> mapStatusToIdStatusTestCase = {};
 
   late final ProcessHelper _processHelper;
 
@@ -183,10 +184,17 @@ class JiraTekoFlutter {
     return result;
   }
 
-  Future handleStatusTestCase() async {
-    final List<dynamic> status = await JiraTekoTestRunner.getStatusTest();
+  Future handleStatusTestCaseResult() async {
+    final List<dynamic> status = await JiraTekoTestRunner.getStatusTestResult();
     for (var element in status) {
-      mapStatusToIdStatus[element['name']] = element['id'];
+      mapStatusToIdStatusTestCaseResult[element['name']] = element['id'];
+    }
+  }
+
+  Future handleStatusTestCase() async {
+    final List<dynamic> status = await JiraTekoTestRunner.getStatusTestCase();
+    for (var element in status) {
+      mapStatusToIdStatusTestCase[element['name']] = element['id'];
     }
   }
 
@@ -197,7 +205,10 @@ class JiraTekoFlutter {
     );
     parentIdOfFolderTestCase = await getParentIdTestCaseFolder();
     parentIdOfFolderCycles = await getParentIdCyclesFolder();
-    await handleStatusTestCase();
+    await Future.wait([
+      handleStatusTestCaseResult(),
+      handleStatusTestCase(),
+    ]);
 
     log('=====================================================================================');
     log('*** Run all tests!');
