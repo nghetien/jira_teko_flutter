@@ -1,4 +1,5 @@
-import 'package:jira_teko_flutter/src/main.dart' show JiraTekoProjectInfo, JiraTekoFlutter;
+import 'package:jira_teko_flutter/src/main.dart'
+    show JiraTekoProjectInfo, JiraTekoFlutter;
 
 void main() async {
   const List<String> issues = [

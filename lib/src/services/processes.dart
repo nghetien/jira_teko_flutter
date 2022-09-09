@@ -69,6 +69,8 @@ class MacOSProcessHelper implements ProcessHelper {
   Iterable<String> getPaths(String pathFile) {
     final RegExp pathRegex = RegExp(r'.\/(.*)\.dart');
 
-    return pathRegex.allMatches(pathFile.trim()).map((e) => "./${e.group(1)}.dart");
+    return pathRegex
+        .allMatches(pathFile.trim())
+        .map((e) => "./${e.group(1)}.dart");
   }
 }

@@ -12,3 +12,5 @@
 * Add status for new testcases
 ## 0.0.6
 * Fix regex for file name matching
+## 0.0.7
+* Fix Add status for new testcases
