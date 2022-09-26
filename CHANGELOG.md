@@ -14,3 +14,5 @@
 * Fix regex for file name matching
 ## 0.0.7
 * Fix Add status for new testcases
+## 0.0.8
+* Add push test cast with option: auto create cycle, auto create test case with status

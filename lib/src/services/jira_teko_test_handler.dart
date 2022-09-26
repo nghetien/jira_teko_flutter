@@ -11,11 +11,8 @@ class JiraTekoTestHandler {
 
   /// get all issues from issue key
   Future<List<String>> getIssuesIdFromIssueKey(String issueKey) async {
-    final Map<String, dynamic> issues =
-        await JiraTekoTestRunner.getIssueId(issueKey);
-    return (issues['issues'] as List<dynamic>)
-        .map<String>((issue) => issue['id'])
-        .toList();
+    final Map<String, dynamic> issues = await JiraTekoTestRunner.getIssueId(issueKey);
+    return (issues['issues'] as List<dynamic>).map<String>((issue) => issue['id']).toList();
   }
 
   /// handle test cases and create test cases unavailable in Jira
@@ -28,15 +25,13 @@ class JiraTekoTestHandler {
         final String nameTestCase = element['name'];
         final Map<String, dynamic> findTestCases =
             await JiraTekoTestRunner.getTestsInIssue(nameTestCase);
-        if (findTestCases['results'] == null ||
-            findTestCases['results'].length == 0) {
+        if (findTestCases['results'] == null || findTestCases['results'].length == 0) {
           final int idTestCase = await JiraTekoTestRunner.createTest(
             testName: nameTestCase,
             issueKey: issueKey,
             folderId: JiraTekoFlutter.mapKeyToIdFolderTestCase[issueKey]!,
           );
-          final List<String> issuesFromIssueKey =
-              await getIssuesIdFromIssueKey(issueKey);
+          final List<String> issuesFromIssueKey = await getIssuesIdFromIssueKey(issueKey);
           if (issuesFromIssueKey.isNotEmpty) {
             await JiraTekoTestRunner.addIssueToTest(
               idTestCase,
@@ -65,8 +60,7 @@ class JiraTekoTestHandler {
     }
     try {
       return allTestCaseInCycles.firstWhere((testCase) =>
-          testCase['lastTestResult']['testCaseId'] ==
-          testCaseId)['lastTestResult']['id'] as int;
+          testCase['lastTestResult']['testCaseId'] == testCaseId)['lastTestResult']['id'] as int;
     } catch (e) {
       throw Exception('Cant not find id test case in cycles');
     }
@@ -77,8 +71,7 @@ class JiraTekoTestHandler {
     /// handle name test cycles
     String nameTestCycle = 'Test Cycle';
     try {
-      final Map<String, dynamic> issue =
-          await JiraTekoTestRunner.getIssueId(issueKey);
+      final Map<String, dynamic> issue = await JiraTekoTestRunner.getIssueId(issueKey);
       nameTestCycle = issue['issues'][0]['fields']['summary'];
     } catch (e) {
       throw Exception('Failed to get issue name');
@@ -86,32 +79,27 @@ class JiraTekoTestHandler {
     try {
       final RegExp regExp = RegExp('^(\\[[0-9a-zA-Z]+\\] ?)*');
       final RegExpMatch? match = regExp.firstMatch(nameTestCycle);
-      nameTestCycle = nameTestCycle
-          .substring(match!.group(0)?.length ?? 0, nameTestCycle.length)
-          .trim();
+      nameTestCycle =
+          nameTestCycle.substring(match!.group(0)?.length ?? 0, nameTestCycle.length).trim();
     } catch (e) {
       log(e);
     }
 
     /// count round
-    final Map<String, dynamic> testCycles =
-        await JiraTekoTestRunner.getAllCyclesOfFolder(
+    final Map<String, dynamic> testCycles = await JiraTekoTestRunner.getAllCyclesOfFolder(
       JiraTekoFlutter.mapKeyToIdFolderCycles[issueKey]!,
     );
     final int round = testCycles['results']?.length ?? 0;
 
     /// Create cycles
-    final Map<String, dynamic> testCycle =
-        await JiraTekoTestRunner.createTestCycle(
+    final Map<String, dynamic> testCycle = await JiraTekoTestRunner.createTestCycle(
       nameCycle: '[$issueKey] $nameTestCycle - round ${round + 1}',
       folderId: JiraTekoFlutter.mapKeyToIdFolderCycles[issueKey]!,
     );
 
     /// Add test cast to test cycles
     List<Map<String, dynamic>> testcases = [];
-    for (int index = 0;
-        index < mapIssuesToTestCases[issueKey]!.length;
-        index++) {
+    for (int index = 0; index < mapIssuesToTestCases[issueKey]!.length; index++) {
       testcases.add({
         'index': index,
         'lastTestResult': {
@@ -130,8 +118,7 @@ class JiraTekoTestHandler {
       await getIssuesIdFromIssueKey(issueKey),
     );
 
-    final List<dynamic> allTestCaseInCycles =
-        await JiraTekoTestRunner.getAllTestCaseInCycles(
+    final List<dynamic> allTestCaseInCycles = await JiraTekoTestRunner.getAllTestCaseInCycles(
       testCycle['id'],
     );
 
@@ -140,8 +127,7 @@ class JiraTekoTestHandler {
           (element) => {
             "id": getIdTestCaseInCycles(allTestCaseInCycles, element['id']),
             "testResultStatusId":
-                JiraTekoFlutter.mapStatusToIdStatusTestCaseResult[
-                    element['status'] ?? 'Fail']!,
+                JiraTekoFlutter.mapStatusToIdStatusTestCaseResult[element['status'] ?? 'Fail']!,
           },
         )
         .toList();
@@ -161,10 +147,12 @@ class JiraTekoTestHandler {
       /// Handle test cases available in jira && Create test cases unavailable in jira
       await handleMapTestIssuesToTestCases(issueKey);
 
-      log('Create test cycles of folder $issueKey!');
+      if (JiraTekoFlutter.jiraOptions.createCycle) {
+        log('Create test cycles of folder $issueKey!');
 
-      /// create test cycle on Jira
-      await createTestCycle(issueKey);
+        /// create test cycle on Jira
+        await createTestCycle(issueKey);
+      }
     } catch (error) {
       log(error);
       throw Exception('Failed to submit after test');
@@ -176,8 +164,7 @@ class JiraTekoTestHandler {
     final List<String> issuesKey = mapIssuesToTestCases.keys.toList();
     if (issuesKey.isNotEmpty) {
       for (String issueKey in issuesKey) {
-        if (mapIssuesToTestCases[issueKey] == null ||
-            mapIssuesToTestCases[issueKey]!.isEmpty) {
+        if (mapIssuesToTestCases[issueKey] == null || mapIssuesToTestCases[issueKey]!.isEmpty) {
           throw Exception('No test cases found for $issueKey');
         }
         await submitAfterTest(issueKey);

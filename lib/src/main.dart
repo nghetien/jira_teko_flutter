@@ -1,28 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'models/models.dart';
 import 'services/services.dart';
 import 'utils/utils.dart';
-
-class JiraTekoProjectInfo {
-  final String scheme;
-  final String host;
-  final String jiraUserName;
-  final String jiraPassword;
-  final int projectId;
-  final String projectKey;
-  final String folder;
-
-  const JiraTekoProjectInfo({
-    required this.scheme,
-    required this.host,
-    required this.jiraUserName,
-    required this.jiraPassword,
-    required this.projectId,
-    required this.projectKey,
-    required this.folder,
-  });
-}
 
 class JiraTekoFlutter {
   static late final JiraTekoProjectInfo _projectInfo;
@@ -30,6 +11,12 @@ class JiraTekoFlutter {
   static JiraTekoProjectInfo get projectInfo => _projectInfo;
 
   static void setProjectInfo(JiraTekoProjectInfo info) => _projectInfo = info;
+
+  static late final JiraTekoRunnerOption _jiraOptions;
+
+  static JiraTekoRunnerOption get jiraOptions => _jiraOptions;
+
+  static void setJiraOptions(JiraTekoRunnerOption option) => _jiraOptions = option;
 
   JiraTekoFlutter({
     required this.issues,
@@ -39,10 +26,8 @@ class JiraTekoFlutter {
 
   final List<String> issues;
 
-  static const String pathFileExportResultTest =
-      './test/export_result_test.log';
-  static const String pathFileExportAllTest =
-      './test/export_result_all_test.json';
+  static const String pathFileExportResultTest = './test/export_result_test.log';
+  static const String pathFileExportAllTest = './test/export_result_all_test.json';
   static late final String token;
 
   static late final int parentIdOfFolderTestCase;
@@ -62,8 +47,7 @@ class JiraTekoFlutter {
     return WindowsProcessHelper();
   }
 
-  Map<String, dynamic> findFolder(
-      List<dynamic> children, String nameOfFolderFind) {
+  Map<String, dynamic> findFolder(List<dynamic> children, String nameOfFolderFind) {
     for (Map<String, dynamic> child in children) {
       if (child['name'] == nameOfFolderFind) {
         return child;
@@ -72,8 +56,7 @@ class JiraTekoFlutter {
     return {};
   }
 
-  Map<String, dynamic> findFolderByName(
-      List<dynamic> children, String folderName) {
+  Map<String, dynamic> findFolderByName(List<dynamic> children, String folderName) {
     final List<String> namesFolder = JiraTekoFlutter.projectInfo.folder
         .split('/')
         .where((element) => element.isNotEmpty)
@@ -81,8 +64,7 @@ class JiraTekoFlutter {
     List<dynamic> flagChildren = children;
     for (int index = 0; index < namesFolder.length; index++) {
       final String currentName = namesFolder[index];
-      final Map<String, dynamic> currentFolder =
-          findFolder(flagChildren, currentName);
+      final Map<String, dynamic> currentFolder = findFolder(flagChildren, currentName);
       if (currentFolder.isEmpty) {
         return {};
       }
@@ -98,8 +80,7 @@ class JiraTekoFlutter {
   /// get parent id of last folder in folder field
   /// return -1 if not found, return id of folder [TESTCASE] if found
   Future<int> getParentIdTestCaseFolder() async {
-    final Map<String, dynamic> projectTrees =
-        await JiraTekoTestRunner.getProjectTreesTestcase();
+    final Map<String, dynamic> projectTrees = await JiraTekoTestRunner.getProjectTreesTestcase();
     final Map<String, dynamic> folder = findFolderByName(
       projectTrees['children'],
       JiraTekoFlutter.projectInfo.folder,
@@ -113,8 +94,7 @@ class JiraTekoFlutter {
         )
         .toList();
     if (folder.isEmpty) {
-      throw Exception(
-          'Can not find folder testcase ${JiraTekoFlutter.projectInfo.folder}');
+      throw Exception('Can not find folder testcase ${JiraTekoFlutter.projectInfo.folder}');
     }
     return folder['id'];
   }
@@ -123,8 +103,7 @@ class JiraTekoFlutter {
   /// get parent id of last folder in folder field
   /// return -1 if not found, return id of folder [CYCLES] if found
   Future<int> getParentIdCyclesFolder() async {
-    final Map<String, dynamic> projectTrees =
-        await JiraTekoTestRunner.getProjectTreesCycles();
+    final Map<String, dynamic> projectTrees = await JiraTekoTestRunner.getProjectTreesCycles();
     final Map<String, dynamic> folder = findFolderByName(
       projectTrees['children'],
       JiraTekoFlutter.projectInfo.folder,
@@ -138,8 +117,7 @@ class JiraTekoFlutter {
         )
         .toList();
     if (folder.isEmpty) {
-      throw Exception(
-          'Can not find folder cycles ${JiraTekoFlutter.projectInfo.folder}');
+      throw Exception('Can not find folder cycles ${JiraTekoFlutter.projectInfo.folder}');
     }
     return folder['id'];
   }
@@ -152,8 +130,7 @@ class JiraTekoFlutter {
     return encoded;
   }
 
-  Map<String, List<Map<String, dynamic>>> convertMapStringToMapList(
-      Map<String, dynamic> map) {
+  Map<String, List<Map<String, dynamic>>> convertMapStringToMapList(Map<String, dynamic> map) {
     Map<String, List<Map<String, dynamic>>> result = {};
     map.forEach((key, value) {
       result[key] = value
@@ -168,8 +145,7 @@ class JiraTekoFlutter {
 
   Future<List<Map<String, dynamic>>> getResultsTestCase(String issue) async {
     final List<Map<String, dynamic>> result = [];
-    final List<String> dataLineOfFile =
-        await File(pathFileExportResultTest).readAsLines();
+    final List<String> dataLineOfFile = await File(pathFileExportResultTest).readAsLines();
     if (dataLineOfFile[0] ==
         "More than one device connected; please specify a device with the '-d <deviceId>' flag, or use '-d all' to act on all devices.") {
       throw Exception(
@@ -181,10 +157,8 @@ class JiraTekoFlutter {
       final String findTestCase = '^{"test":{"id":[0-9]+,"name":"\\[$issue\\]';
       final regex = RegExp(findTestCase);
       if (regex.hasMatch(dataLineOfFile[line].trim())) {
-        final Map<String, dynamic> dataJsonFromLine =
-            json.decode(dataLineOfFile[line]);
-        final Map<String, dynamic> resultJsonFromLine =
-            json.decode(dataLineOfFile[line + 1]);
+        final Map<String, dynamic> dataJsonFromLine = json.decode(dataLineOfFile[line]);
+        final Map<String, dynamic> resultJsonFromLine = json.decode(dataLineOfFile[line + 1]);
         line += 2;
         result.add({
           'name': dataJsonFromLine['test']['name'],
@@ -244,8 +218,7 @@ class JiraTekoFlutter {
             pathFileExportResultTest: pathFileExportResultTest,
           );
 
-          final List<Map<String, dynamic>> resultsTestCase =
-              await getResultsTestCase(issue);
+          final List<Map<String, dynamic>> resultsTestCase = await getResultsTestCase(issue);
           if (mapIssuesToTestCases[issue] == null) {
             mapIssuesToTestCases[issue] = [];
           }

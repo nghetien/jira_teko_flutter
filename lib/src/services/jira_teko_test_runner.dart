@@ -20,8 +20,7 @@ class JiraTekoTestRunner {
   static Future<List<dynamic>> getStatusTestResult() async {
     final response = await http.get(
       getUrlWith(
-        suffix:
-            '/tests/1.0/project/${JiraTekoFlutter.projectInfo.projectId}/testresultstatus',
+        suffix: '/tests/1.0/project/${JiraTekoFlutter.projectInfo.projectId}/testresultstatus',
       ),
       headers: headers,
     );
@@ -35,8 +34,7 @@ class JiraTekoTestRunner {
   static Future<List<dynamic>> getStatusTestCase() async {
     final response = await http.get(
       getUrlWith(
-        suffix:
-            '/tests/1.0/project/${JiraTekoFlutter.projectInfo.projectId}/testcasestatus',
+        suffix: '/tests/1.0/project/${JiraTekoFlutter.projectInfo.projectId}/testcasestatus',
       ),
       headers: headers,
     );
@@ -59,8 +57,7 @@ class JiraTekoTestRunner {
       getUrlWith(suffix: '/api/2/search'),
       headers: headers,
       body: jsonEncode({
-        "jql":
-            "project = ${JiraTekoFlutter.projectInfo.projectId} AND key = $issueKey",
+        "jql": "project = ${JiraTekoFlutter.projectInfo.projectId} AND key = $issueKey",
         "startAt": 0,
         "fields": [
           "summary",
@@ -157,8 +154,7 @@ class JiraTekoTestRunner {
   static Future<Map<String, dynamic>> getProjectTreesCycles() async {
     final response = await http.get(
       getUrlWith(
-          suffix:
-              '/tests/1.0/project/${JiraTekoFlutter.projectInfo.projectId}/foldertree/testrun'),
+          suffix: '/tests/1.0/project/${JiraTekoFlutter.projectInfo.projectId}/foldertree/testrun'),
       headers: headers,
     );
     if (response.statusCode == 200) {
@@ -197,7 +193,8 @@ class JiraTekoTestRunner {
         "name": testName,
         "projectId": JiraTekoFlutter.projectInfo.projectId,
         'statusId': JiraTekoFlutter
-            .mapStatusToIdStatusTestCase['Approved'] // status is approved
+            .mapStatusToIdStatusTestCase[JiraTekoFlutter.jiraOptions.statusTestCase.value]
+        // status is approved
       }),
       headers: headers,
     );
@@ -276,8 +273,7 @@ class JiraTekoTestRunner {
         }),
         headers: headers,
       );
-      JiraTekoFlutter.mapKeyToIdFolderTestCase[issueKey] =
-          json.decode(response.body)['id'] as int;
+      JiraTekoFlutter.mapKeyToIdFolderTestCase[issueKey] = json.decode(response.body)['id'] as int;
     } else {
       JiraTekoFlutter.mapKeyToIdFolderTestCase[issueKey] = idFolderTestCase;
     }
@@ -302,8 +298,7 @@ class JiraTekoTestRunner {
         }),
         headers: headers,
       );
-      JiraTekoFlutter.mapKeyToIdFolderCycles[issueKey] =
-          json.decode(response.body)['id'] as int;
+      JiraTekoFlutter.mapKeyToIdFolderCycles[issueKey] = json.decode(response.body)['id'] as int;
     } else {
       JiraTekoFlutter.mapKeyToIdFolderCycles[issueKey] = idFolderCycles;
     }
