@@ -16,3 +16,6 @@
 * Fix Add status for new testcases
 ## 0.0.8
 * Add push test cast with option: auto create cycle, auto create test case with status
+## 0.1.0
+* Add smart read title of testcase.
+* Now just add the issue name to the top of the test file, Don't need to add the issue name to the group test as before.

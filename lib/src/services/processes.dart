@@ -3,8 +3,15 @@ import 'dart:io';
 abstract class ProcessHelper {
   Future<String> findFileBy({required String issue});
 
-  Future<ProcessResult> runTestWith(
-      {required String path, required String pathFileExportResultTest});
+  Future<ProcessResult> runTestWith({
+    required String path,
+    required String pathFileExportResultTest,
+  });
+
+  Future runExportReportXML({
+    required String pathFileExportResultTest,
+    required String pathFileExportReportXML,
+  });
 
   Iterable<String> getPaths(String pathFile);
 }
@@ -28,6 +35,17 @@ class WindowsProcessHelper implements ProcessHelper {
   }) =>
       Process.run(
         'flutter test $path --reporter json > $pathFileExportResultTest',
+        [],
+        runInShell: true,
+      );
+
+  @override
+  Future runExportReportXML({
+    required String pathFileExportResultTest,
+    required String pathFileExportReportXML,
+  }) =>
+      Process.run(
+        'dart pub global run junitreport:tojunit --input $pathFileExportResultTest --output $pathFileExportReportXML',
         [],
         runInShell: true,
       );
@@ -63,6 +81,20 @@ class MacOSProcessHelper implements ProcessHelper {
           '-c',
           'flutter test $path --reporter json > $pathFileExportResultTest',
         ],
+      );
+
+  @override
+  Future runExportReportXML({
+    required String pathFileExportResultTest,
+    required String pathFileExportReportXML,
+  }) =>
+      Process.run(
+        '/bin/zsh',
+        [
+          '-c',
+          'dart pub global run junitreport:tojunit --input $pathFileExportResultTest --output $pathFileExportReportXML',
+        ],
+        runInShell: true,
       );
 
   @override

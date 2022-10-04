@@ -27,10 +27,11 @@ class JiraTekoFlutter {
 
   final List<String> issues;
 
-  static const String pathFileExportResultTest =
+  static const String $pathFileExportResultTest =
       './test/export_result_test.log';
-  static const String pathFileExportAllTest =
+  static const String $pathFileExportAllTest =
       './test/export_result_all_test.json';
+  static const String $pathFileExportReportXML = './test/TEST-report.xml';
   static late final String token;
 
   static late final int parentIdOfFolderTestCase;
@@ -157,7 +158,7 @@ class JiraTekoFlutter {
   Future<List<Map<String, dynamic>>> getResultsTestCase(String issue) async {
     final List<Map<String, dynamic>> result = [];
     final List<String> dataLineOfFile =
-        await File(pathFileExportResultTest).readAsLines();
+        await File($pathFileExportReportXML).readAsLines();
     if (dataLineOfFile[0] ==
         "More than one device connected; please specify a device with the '-d <deviceId>' flag, or use '-d all' to act on all devices.") {
       throw Exception(
@@ -166,18 +167,29 @@ class JiraTekoFlutter {
     }
     int line = 0;
     while (line < dataLineOfFile.length) {
-      final String findTestCase = '^{"test":{"id":[0-9]+,"name":"\\[$issue\\]';
-      final regex = RegExp(findTestCase);
-      if (regex.hasMatch(dataLineOfFile[line].trim())) {
-        final Map<String, dynamic> dataJsonFromLine =
-            json.decode(dataLineOfFile[line]);
-        final Map<String, dynamic> resultJsonFromLine =
-            json.decode(dataLineOfFile[line + 1]);
-        line += 2;
-        result.add({
-          'name': dataJsonFromLine['test']['name'],
-          'status': resultJsonFromLine['result'] == 'success' ? "Pass" : "Fail",
-        });
+      const findTestCaseInfo = '^<testcase';
+      final currentLine = dataLineOfFile[line].trim();
+      if (RegExp(findTestCaseInfo).hasMatch(currentLine)) {
+        final getNameTestCase = RegExp(' name=\\".*\\" time')
+            .stringMatch(currentLine)
+            ?.replaceAll(' name="', '')
+            .replaceAll('" time', '')
+            .trim();
+        const findError = '^<error';
+        final nextLine = dataLineOfFile[line + 1].trim();
+        if (RegExp(findError).hasMatch(nextLine)) {
+          line += 1;
+          result.add({
+            'name': getNameTestCase,
+            'status': "Fail",
+          });
+        } else {
+          result.add({
+            'name': getNameTestCase,
+            'status': "Pass",
+          });
+        }
+        line += 1;
       } else {
         line += 1;
       }
@@ -225,15 +237,23 @@ class JiraTekoFlutter {
 
         for (String path in paths) {
           log('path: $path');
-          log('run: ${'flutter test $path --reporter json > $pathFileExportResultTest'}');
+          log('run: ${'flutter test $path --reporter json > ${$pathFileExportResultTest}'}');
 
           await _processHelper.runTestWith(
             path: path,
-            pathFileExportResultTest: pathFileExportResultTest,
+            pathFileExportResultTest: $pathFileExportResultTest,
+          );
+
+          log('dart pub global run junitreport:tojunit --input ${$pathFileExportResultTest} --output ${$pathFileExportReportXML}');
+
+          await _processHelper.runExportReportXML(
+            pathFileExportResultTest: $pathFileExportResultTest,
+            pathFileExportReportXML: $pathFileExportReportXML,
           );
 
           final List<Map<String, dynamic>> resultsTestCase =
               await getResultsTestCase(issue);
+
           if (mapIssuesToTestCases[issue] == null) {
             mapIssuesToTestCases[issue] = [];
           }
@@ -249,7 +269,8 @@ class JiraTekoFlutter {
     log('*** Run all tests done!');
     log('=====================================================================================');
 
-    File(pathFileExportResultTest).delete();
+    File($pathFileExportResultTest).delete();
+    File($pathFileExportReportXML).delete();
 
     log('*** Handle results!');
     log('=====================================================================================');
@@ -265,7 +286,7 @@ class JiraTekoFlutter {
     log('*** Write result to file json!');
     log('=====================================================================================');
 
-    final File allTestCase = await File(pathFileExportAllTest).create();
+    final File allTestCase = await File($pathFileExportAllTest).create();
     allTestCase.writeAsString(json.encode(resultHandle));
 
     log('*** Push test case to jira finished!');
