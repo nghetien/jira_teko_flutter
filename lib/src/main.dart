@@ -212,6 +212,9 @@ class JiraTekoFlutter {
   }
 
   Future run() async {
+    log('=====================================================================================');
+    log('*** Generate Token & Get Testcase Folder, Cycle Id!');
+    log('=====================================================================================');
     token = generateToken(
       projectInfo.jiraUserName,
       projectInfo.jiraPassword,
@@ -223,7 +226,6 @@ class JiraTekoFlutter {
       handleStatusTestCase(),
     ]);
 
-    log('=====================================================================================');
     log('*** Run all tests!');
     log('=====================================================================================');
 
