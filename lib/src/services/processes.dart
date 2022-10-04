@@ -94,12 +94,11 @@ class MacOSProcessHelper implements ProcessHelper {
           '-c',
           'dart pub global run junitreport:tojunit --input $pathFileExportResultTest --output $pathFileExportReportXML',
         ],
-        runInShell: true,
       );
 
   @override
   Iterable<String> getPaths(String pathFile) {
-    final RegExp pathRegex = RegExp(r'.\/(.*)\.dart');
+    final RegExp pathRegex = RegExp(r'./(.*)\.dart');
 
     return pathRegex
         .allMatches(pathFile.trim())
