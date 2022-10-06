@@ -12,7 +12,7 @@ class JiraTekoFlutter {
 
   static void setProjectInfo(JiraTekoProjectInfo info) => _projectInfo = info;
 
-  static late final JiraTekoRunnerOption _jiraOptions;
+  static JiraTekoRunnerOption _jiraOptions = JiraTekoRunnerOption();
 
   static JiraTekoRunnerOption get jiraOptions => _jiraOptions;
 
