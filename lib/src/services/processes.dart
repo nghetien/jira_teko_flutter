@@ -52,7 +52,11 @@ class WindowsProcessHelper implements ProcessHelper {
 
   @override
   Iterable<String> getPaths(String pathFile) {
-    return pathFile.trim().split('\r\n');
+    return pathFile.trim().split('\r\n').where(
+          (element) =>
+              element.contains('/integration_test/') ||
+              element.contains('/test/'),
+        );
   }
 }
 
@@ -100,8 +104,12 @@ class MacOSProcessHelper implements ProcessHelper {
   Iterable<String> getPaths(String pathFile) {
     final RegExp pathRegex = RegExp(r'./(.*)\.dart');
 
-    return pathRegex
+    final results = pathRegex
         .allMatches(pathFile.trim())
         .map((e) => "./${e.group(1)}.dart");
+    return results.where(
+      (element) =>
+          element.contains('/integration_test/') || element.contains('/test/'),
+    );
   }
 }
