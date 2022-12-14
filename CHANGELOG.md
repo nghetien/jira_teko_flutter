@@ -1,6 +1,7 @@
+## 0.1.3
+* Update README.md
 ## 0.1.2
 * Fix bug: find all file in the project -> fix find only file in test or integration test
-* 
 ## 0.1.1
 * Fix bug don't set jira options
 ## 0.1.0
